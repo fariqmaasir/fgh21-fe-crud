@@ -1,6 +1,8 @@
 import React from "react";
 import { FaArrowLeft } from "react-icons/fa6";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import { basicSchema } from "../schemas";
 
 function EditUsers() {
   const { id } = useParams();
@@ -28,11 +30,10 @@ function EditUsers() {
     }
     usersData();
   }, []);
-  async function addData(event) {
-    event.preventDefault();
-    const name = event.target.name.value;
-    const email = event.target.email.value;
-    const password = event.target.name.value;
+  const onSubmit = async (values, actions) => {
+    const name = values.name;
+    const email = values.email;
+    const password = values.name;
     const body = new URLSearchParams({
       name,
       email,
@@ -47,46 +48,96 @@ function EditUsers() {
         throw new Error(`Response status: ${response.status}`);
       }
       const json = await response.json();
-      navigate("/");
       console.log(json);
+      actions.resetForm();
+      navigate("/");
     } catch (err) {
       console.error(err.message);
     }
-  }
-  console.log(data[0]);
+  };
+  const { values, errors, touched, handleBlur, handleChange, handleSubmit } =
+    useFormik({
+      initialValues: {
+        name: "",
+        email: "",
+        password: "",
+      },
+      validationSchema: basicSchema,
+      onSubmit,
+    });
+  console.log(errors);
   return (
     <div className="flex flex-col justify-center items-center w-screen h-screen">
-      <Link to="/">
-        <div className="justify-self-start flex items-center gap-2 hover:text-blue-500">
-          <FaArrowLeft />
-          Back to List Data
-        </div>
-      </Link>
-      <form onSubmit={addData} className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-7 w-60">
+        <Link to="/">
+          <div className="justify-self-start flex items-center gap-2 hover:text-blue-500">
+            <FaArrowLeft />
+            Back to List Data
+          </div>
+        </Link>
         <div className="flex flex-col">
           <label htmlFor="">Fullname</label>
           <input
             name="name"
             type="text"
-            className="border px-4 p-2"
+            value={values.name}
+            onChange={handleChange}
+            className={
+              errors.name && touched.name
+                ? "mt-1 block w-full px-3 py-2.5 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500"
+                : "mt-1 block w-full px-3 py-2.5 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+            }
+            onBlur={handleBlur}
             defaultValue={data[0].name}
           />
+          {errors.name && touched.name && (
+            <p className="text-red-500">{errors.name}</p>
+          )}
         </div>
         <div className="flex flex-col">
           <label htmlFor="">Email</label>
           <input
             name="email"
             type="email"
-            className="border px-4 p-2"
+            value={values.email}
+            onChange={handleChange}
+            className={
+              errors.email && touched.email
+                ? "mt-1 block w-full px-3 py-2.5 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500"
+                : "mt-1 block w-full px-3 py-2.5 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+            }
+            onBlur={handleBlur}
             defaultValue={data[0].email}
           />
+          {errors.email && touched.email && (
+            <p className="text-red-500">{errors.email}</p>
+          )}
         </div>
         <div className="flex flex-col">
           <label htmlFor="">Password</label>
-          <input name="password" type="password" className="border px-4 p-2" />
+          <input
+            name="password"
+            type="password"
+            value={values.password}
+            onChange={handleChange}
+            className={
+              errors.password && touched.password
+                ? "mt-1 block w-full px-3 py-2.5 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500"
+                : "mt-1 block w-full px-3 py-2.5 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+            }
+            onBlur={handleBlur}
+          />
+          {errors.password && touched.password && (
+            <p className="text-red-500">{errors.password}</p>
+          )}
         </div>
         <div>
-          <button type="submit">Save</button>
+          <button
+            type="submit"
+            className="bg-blue-500 text-white py-2 px-5 rounded-xl"
+          >
+            Save
+          </button>
         </div>
       </form>
     </div>
